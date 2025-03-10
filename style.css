@@ -9,3 +9,32 @@ button {
     font-size: 16px;
     cursor: pointer;
 }
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    transition: background-color 0.5s ease-in-out;
+}
+
+/* Full-screen sections */
+.section {
+    height: 100vh; /* Each section takes full viewport height */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: bold;
+    color: white;
+    background-attachment: fixed;
+}
+
+/* Assign different background colors to sections */
+.section:nth-child(1) { background-color: #ff5733; }  /* Orange */
+.section:nth-child(2) { background-color: #33ff57; }  /* Green */
+.section:nth-child(3) { background-color: #3357ff; }  /* Blue */
+.section:nth-child(4) { background-color: #ff33a8; }  /* Pink */
+
