@@ -15,11 +15,19 @@
     <p id="message"></p>
     <br>
     <script src="script.js"></script>
-
+    <style>
+        form {
+          border: 2px solid #333; /* Adds a 2px solid border around the form */
+          padding: 20px;           /* Adds space inside the form */
+          width: 300px;            /* Optional: Set the width of the form */
+        }
+      </style>
     <form action="/script.js" method="POST" class="form">
         <h1>Have you invested before?</h1>
         <label for="Yes">Yes</label>
         <input type="radio" name="style" id="yes" value="yes">
+        <label for="Nope">Nope</label>
+        <input type="radio" name="style" id="no" value="no">
     </form>
 </body>
 </html>
