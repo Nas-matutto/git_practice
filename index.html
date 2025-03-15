@@ -3,31 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My First Web App</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Investment Return Calculator</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Financial Gains Tool</h1>
-    <br>
-    <h3>Estimate the value of your Investment Portfolio</h3>
-    <br>
-    <button onclick="showMessage()">Click here to know who built this</button>
-    <p id="message"></p>
-    <br>
+
+    <div class="calculator-container">
+        <h1>Investment Return Calculator</h1>
+
+        <div class="input-group">
+            <label for="initial">Initial Investment ($)</label>
+            <input type="number" id="initial" placeholder="Enter initial amount" min="0">
+        </div>
+
+        <div class="input-group">
+            <label for="monthly">Monthly Contribution ($)</label>
+            <input type="number" id="monthly" placeholder="Enter monthly contribution" min="0">
+        </div>
+
+        <div class="input-group">
+            <label for="growth">Annual Growth Rate (%)</label>
+            <input type="number" id="growth" placeholder="Enter growth rate" min="0">
+        </div>
+
+        <div class="input-group">
+            <label for="years">Timeframe (Years)</label>
+            <input type="number" id="years" placeholder="Enter number of years" min="1">
+        </div>
+
+        <button onclick="calculateReturn()">Calculate</button>
+
+        <div id="result" class="result-box"></div>
+    </div>
+
     <script src="script.js"></script>
-    <style>
-        form {
-          border: 2px solid #333; /* Adds a 2px solid border around the form */
-          padding: 20px;           /* Adds space inside the form */
-          width: 300px;            /* Optional: Set the width of the form */
-        }
-      </style>
-    <form action="/script.js" method="POST" class="form">
-        <h1>Have you invested before?</h1>
-        <label for="Yes">Yes</label>
-        <input type="radio" name="style" id="yes" value="yes">
-        <label for="Nope">Nope</label>
-        <input type="radio" name="style" id="no" value="no">
-    </form>
 </body>
 </html>
