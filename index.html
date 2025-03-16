@@ -21,7 +21,7 @@
                 <label for="monthlyContribution">Monthly Contribution ($)</label>
                 <input type="number" id="monthlyContribution" min="0" value="100">
             </div>
-            
+
             <div class="input-field">
                 <label for="annualGrowth">Annual Growth Rate (%)</label>
                 <input type="number" id="annualGrowth" min="0" step="0.1" value="7">
@@ -33,22 +33,20 @@
             </div>
         </div>
         
-        <div class="contribution-changes">
-            <h3>Monthly Contribution Changes</h3>
-            <div class="contribution-changes-container">
-                <div class="contribution-change">
-                    <div class="input-field">
-                        <label for="changeYear">Starting Year</label>
-                        <input type="number" class="changeYear" min="1" value="5">
-                    </div>
-                    <div class="input-field">
-                        <label for="changeAmount">New Monthly Amount ($)</label>
-                        <input type="number" class="changeAmount" min="0" value="200">
-                    </div>
-                    <button class="remove-change">×</button>
-                </div>
+        <div class="input-field advanced-toggle-container">
+            <button id="toggleAdvanced" class="toggle-button">Advanced Options</button>
+        </div>
+        
+        <div class="contribution-changes" style="display: none;">
+            <div class="contribution-header">
+                <h3>Monthly Contribution Changes</h3>
+                <button id="closeAdvanced" class="close-button">×</button>
             </div>
-            <button id="addChange">+ Add Another Change</button>
+            <p class="contribution-info">Define years when your monthly contribution will change</p>
+            <div class="contribution-changes-container">
+                <!-- Empty by default, will be populated when needed -->
+            </div>
+            <button id="addChange">+ Add a Contribution Change</button>
         </div>
 
         <button id="calculate">Calculate</button>

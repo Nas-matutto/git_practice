@@ -173,23 +173,20 @@ document.addEventListener('DOMContentLoaded', function() {
         investmentChart.update();
     }
     
-    // Add new contribution change
-    document.getElementById('addChange').addEventListener('click', function() {
+    // Create a contribution change element
+    function createContributionChange(year, amount) {
         const container = document.querySelector('.contribution-changes-container');
         const newChange = document.createElement('div');
         newChange.className = 'contribution-change';
         
-        const lastYearInput = container.querySelector('.contribution-change:last-child .changeYear');
-        const suggestedYear = lastYearInput ? parseInt(lastYearInput.value) + 5 : 5;
-        
         newChange.innerHTML = `
             <div class="input-field">
                 <label for="changeYear">Starting Year</label>
-                <input type="number" class="changeYear" min="1" value="${suggestedYear}">
+                <input type="number" class="changeYear" min="1" value="${year}">
             </div>
             <div class="input-field">
                 <label for="changeAmount">New Monthly Amount ($)</label>
-                <input type="number" class="changeAmount" min="0" value="300">
+                <input type="number" class="changeAmount" min="0" value="${amount}">
             </div>
             <button class="remove-change">×</button>
         `;
@@ -202,24 +199,62 @@ document.addEventListener('DOMContentLoaded', function() {
             calculateReturns();
         });
         
-        calculateReturns();
+        // Add event listeners to inputs
+        newChange.querySelectorAll('input').forEach(input => {
+            input.addEventListener('change', calculateReturns);
+        });
+        
+        return newChange;
+    }
+    
+    // Toggle advanced options
+    document.getElementById('toggleAdvanced').addEventListener('click', function() {
+        const contributionChanges = document.querySelector('.contribution-changes');
+        contributionChanges.style.display = 'block';
+        
+        // Add a first contribution change if container is empty
+        const container = document.querySelector('.contribution-changes-container');
+        if (container.children.length === 0) {
+            const baseAmount = parseFloat(document.getElementById('monthlyContribution').value) || 0;
+            const suggestedAmount = Math.round(baseAmount * 1.5); // 50% increase as suggestion
+            createContributionChange(5, suggestedAmount);
+        }
     });
     
-    // Add event listener to initial remove button
-    document.querySelector('.remove-change').addEventListener('click', function() {
+    // Close advanced options
+    document.getElementById('closeAdvanced').addEventListener('click', function() {
+        const contributionChanges = document.querySelector('.contribution-changes');
+        contributionChanges.style.display = 'none';
+    });
+    
+    // Add new contribution change
+    document.getElementById('addChange').addEventListener('click', function() {
         const container = document.querySelector('.contribution-changes-container');
-        if (container.children.length > 1) {
-            this.closest('.contribution-change').remove();
-            calculateReturns();
+        let suggestedYear = 5;
+        let suggestedAmount = parseFloat(document.getElementById('monthlyContribution').value) * 2 || 200;
+        
+        if (container.children.length > 0) {
+            const lastChange = container.lastElementChild;
+            const lastYearInput = lastChange.querySelector('.changeYear');
+            const lastAmountInput = lastChange.querySelector('.changeAmount');
+            
+            if (lastYearInput && lastAmountInput) {
+                suggestedYear = parseInt(lastYearInput.value) + 5 || 5;
+                suggestedAmount = parseFloat(lastAmountInput.value) * 1.5 || suggestedAmount;
+            }
         }
+        
+        createContributionChange(suggestedYear, Math.round(suggestedAmount));
+        calculateReturns();
     });
     
     // Event listener for calculate button
     document.getElementById('calculate').addEventListener('click', calculateReturns);
     
     // Event listeners for input changes
-    document.querySelectorAll('input').forEach(input => {
+    document.querySelectorAll('#initialInvestment, #monthlyContribution, #annualGrowth, #years').forEach(input => {
         input.addEventListener('change', calculateReturns);
+        input.addEventListener('input', calculateReturns);
     });
     
     // Calculate on page load with default values
