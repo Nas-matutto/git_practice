@@ -259,4 +259,22 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Calculate on page load with default values
     calculateReturns();
+
+    // Add Portfolio button functionality
+document.getElementById('addPortfolio').addEventListener('click', function() {
+    // Save current state to localStorage if needed
+    const currentState = {
+        initialInvestment: parseFloat(document.getElementById('initialInvestment').value) || 0,
+        monthlyContribution: parseFloat(document.getElementById('monthlyContribution').value) || 0,
+        annualGrowth: parseFloat(document.getElementById('annualGrowth').value) || 0,
+        years: parseInt(document.getElementById('years').value) || 0,
+        totalValue: document.getElementById('totalValue').textContent
+    };
+    
+    localStorage.setItem('investmentCalculatorState', JSON.stringify(currentState));
+    
+    // Navigate to portfolio page
+    window.location.href = 'portfolio.html';
+    
+});
 });
