@@ -260,21 +260,48 @@ document.addEventListener('DOMContentLoaded', function() {
     // Calculate on page load with default values
     calculateReturns();
 
-    // Add Portfolio button functionality
-document.getElementById('addPortfolio').addEventListener('click', function() {
-    // Save current state to localStorage if needed
-    const currentState = {
+});
+
+// Add Portfolio button functionality
+document.getElementById('addPortfolio').addEventListener('click', async function() {
+    // Check if user is logged in first
+    const user = window.firebaseAuth?.currentUser;
+    
+    if (!user) {
+        // Just show login modal without the alert
+        document.getElementById("auth-modal").style.display = "flex";
+        return;
+    }
+    
+    // Get current investment data
+    const portfolioData = {
         initialInvestment: parseFloat(document.getElementById('initialInvestment').value) || 0,
         monthlyContribution: parseFloat(document.getElementById('monthlyContribution').value) || 0,
         annualGrowth: parseFloat(document.getElementById('annualGrowth').value) || 0,
         years: parseInt(document.getElementById('years').value) || 0,
-        totalValue: document.getElementById('totalValue').textContent
+        totalValue: document.getElementById('totalValue').textContent,
+        totalInvested: document.getElementById('totalInvested').textContent,
+        totalInterest: document.getElementById('totalInterest').textContent,
+        createdAt: new Date().toISOString()
     };
     
-    localStorage.setItem('investmentCalculatorState', JSON.stringify(currentState));
-    
-    // Navigate to portfolio page
-    window.location.href = 'portfolio.html';
-    
-});
+    try {
+        // Save to Firebase
+        const db = window.firebaseDb;
+        const docRef = await addDoc(collection(db, "portfolios"), {
+            userId: user.uid,
+            ...portfolioData
+        });
+        
+        console.log("Portfolio saved with ID: ", docRef.id);
+        
+        // Store locally too for the portfolio page
+        localStorage.setItem('investmentCalculatorState', JSON.stringify(portfolioData));
+        
+        // Navigate to portfolio page without the alert
+        window.location.href = 'portfolio.html';
+    } catch (error) {
+        console.error("Error saving portfolio: ", error);
+        alert("Error saving portfolio: " + error.message);
+    }
 });

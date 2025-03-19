@@ -11,18 +11,227 @@
         <div class="return-button-container">
             <button id="returnButton" class="return-button">Return</button>
         </div>
+        
         <h1>My Portfolio</h1>
         
         <div class="portfolio-content">
-            <p>Your portfolio information will be displayed here.</p>
-            <!-- Portfolio content will go here -->
+            <p>Loading your portfolio information...</p>
+            <!-- Portfolio content will be loaded dynamically -->
         </div>
     </div>
     
-    <script>
+    <!-- Auth Modal (hidden by default) -->
+    <div id="auth-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>Sign Up / Login</h2>
+            <div class="auth-form">
+                <div class="input-field">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" placeholder="Enter your email">
+                </div>
+                <div class="input-field">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" placeholder="Enter your password">
+                </div>
+                <div class="auth-buttons">
+                    <button id="signup-btn">Sign Up</button>
+                    <button id="login-btn">Login</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT.firebaseapp.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT.appspot.com",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+        
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth();
+        const db = getFirestore();
+        
+        // Auth modal controls
+        const modal = document.getElementById("auth-modal");
+        const authButton = document.getElementById("auth-button");
+        const closeModal = document.querySelector(".close-modal");
+        
+        function showModal() {
+            modal.style.display = "flex";
+        }
+        
+        authButton.addEventListener("click", showModal);
+        
+        closeModal.addEventListener("click", function() {
+            modal.style.display = "none";
+        });
+        
+        window.addEventListener("click", function(event) {
+            if (event.target === modal) {
+                modal.style.display = "none";
+            }
+        });
+        
+        // Return button functionality
         document.getElementById('returnButton').addEventListener('click', function() {
             window.location.href = 'index.html';
         });
+        
+        // Auth functions
+        function signUp() {
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+            
+            createUserWithEmailAndPassword(auth, email, password)
+                .then((userCredential) => {
+                    console.log("User created:", userCredential.user);
+                    alert("User Registered!");
+                    modal.style.display = "none";
+                    updateAuthUI(userCredential.user);
+                    loadPortfolioData(userCredential.user);
+                })
+                .catch((error) => {
+                    console.error("Error:", error.message);
+                    alert("Error: " + error.message);
+                });
+        }
+        
+        function login() {
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+            
+            signInWithEmailAndPassword(auth, email, password)
+                .then((userCredential) => {
+                    console.log("User logged in:", userCredential.user);
+                    alert("Login Successful!");
+                    modal.style.display = "none";
+                    updateAuthUI(userCredential.user);
+                    loadPortfolioData(userCredential.user);
+                })
+                .catch((error) => {
+                    console.error("Error:", error.message);
+                    alert("Error: " + error.message);
+                });
+        }
+        
+        function logout() {
+            signOut(auth).then(() => {
+                console.log("User signed out");
+                updateAuthUI(null);
+                showNotLoggedInContent();
+            }).catch((error) => {
+                console.error("Error signing out:", error);
+            });
+        }
+        
+        // Update UI based on auth state
+        function updateAuthUI(user) {
+            if (user) {
+                authButton.textContent = "Logout";
+                authButton.removeEventListener("click", showModal);
+                authButton.addEventListener("click", logout);
+            } else {
+                authButton.textContent = "Login / Sign Up";
+                authButton.removeEventListener("click", logout);
+                authButton.addEventListener("click", showModal);
+            }
+        }
+        
+        // Load portfolio data from Firebase
+        async function loadPortfolioData(user) {
+            if (!user) return;
+            
+            try {
+                const portfolioContent = document.querySelector('.portfolio-content');
+                portfolioContent.innerHTML = "<p>Loading your portfolios...</p>";
+                
+                const portfoliosQuery = query(collection(db, "portfolios"), where("userId", "==", user.uid));
+                const querySnapshot = await getDocs(portfoliosQuery);
+                
+                if (querySnapshot.empty) {
+                    portfolioContent.innerHTML = "<p>You don't have any saved portfolios yet. Return to the calculator to create one!</p>";
+                    return;
+                }
+                
+                let portfoliosHTML = `<h2>Your Saved Portfolios</h2>`;
+                
+                querySnapshot.forEach((doc) => {
+                    const portfolio = doc.data();
+                    const date = new Date(portfolio.createdAt).toLocaleDateString();
+                    
+                    portfoliosHTML += `
+                        <div class="portfolio-item">
+                            <div class="portfolio-header">
+                                <h3>Portfolio from ${date}</h3>
+                            </div>
+                            <div class="portfolio-summary">
+                                <div class="result-card">
+                                    <div class="result-title">Initial Investment</div>
+                                    <div class="result-value">$${portfolio.initialInvestment.toLocaleString()}</div>
+                                </div>
+                                <div class="result-card">
+                                    <div class="result-title">Monthly Contribution</div>
+                                    <div class="result-value">$${portfolio.monthlyContribution.toLocaleString()}</div>
+                                </div>
+                                <div class="result-card">
+                                    <div class="result-title">Investment Period</div>
+                                    <div class="result-value">${portfolio.years} years</div>
+                                </div>
+                                <div class="result-card">
+                                    <div class="result-title">Expected Annual Return</div>
+                                    <div class="result-value">${portfolio.annualGrowth}%</div>
+                                </div>
+                                <div class="result-card">
+                                    <div class="result-title">Expected Portfolio Value</div>
+                                    <div class="result-value">${portfolio.totalValue}</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                portfolioContent.innerHTML = portfoliosHTML;
+            } catch (error) {
+                console.error("Error loading portfolios:", error);
+                document.querySelector('.portfolio-content').innerHTML = 
+                    `<p>Error loading portfolios: ${error.message}</p>
+                     <p>Please try again later.</p>`;
+            }
+        }
+        
+        function showNotLoggedInContent() {
+          document.querySelector('.portfolio-content').innerHTML = 
+           `<div class="not-logged-content">
+            <p>Please login to view your saved portfolios.</p>
+            <button id="login-prompt" class="portfolio-button">Login / Sign Up</button>
+            </div>`;
+            
+    document.getElementById('login-prompt').addEventListener('click', showModal);
+}
+        
+        // Check auth state on page load
+        onAuthStateChanged(auth, (user) => {
+            updateAuthUI(user);
+            if (user) {
+                loadPortfolioData(user);
+            } else {
+                showNotLoggedInContent();
+            }
+        });
+        
+        // Add event listeners
+        document.getElementById("signup-btn").addEventListener("click", signUp);
+        document.getElementById("login-btn").addEventListener("click", login);
     </script>
 </body>
 </html>

@@ -5,12 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Investment Return Calculator</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css">      
 </head>
+
 <body>
+
+        <!-- Add login status/button in the top right -->
+        <div class="auth-status">
+            <button id="auth-button" class="auth-button">Login / Sign Up</button>
+        </div>
+
     <div class="calculator-container">
         <h1>Investment Return Calculator</h1>
-        
+    
         <div class="input-group">
             <div class="input-field">
                 <label for="initialInvestment">Initial Investment ($)</label>
@@ -75,9 +82,151 @@
         <div class="portfolio-button-container">
             <button id="addPortfolio" class="portfolio-button">Add my Portfolio</button>
         </div>
-        
+
     </div>
     
+        <!-- Auth Modal (hidden by default) -->
+        <div id="auth-modal" class="modal">
+            <div class="modal-content">
+                <span class="close-modal">&times;</span>
+                <h2>Sign Up / Login</h2>
+                <div class="auth-form">
+                    <div class="input-field">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" placeholder="Enter your email">
+                    </div>
+                    <div class="input-field">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" placeholder="Enter your password">
+                    </div>
+                    <div class="auth-buttons">
+                        <button id="signup-btn">Sign Up</button>
+                        <button id="login-btn">Login</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     <script src="script.js"></script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+      
+        const firebaseConfig = {
+            apiKey: "AIzaSyAUfZeYcgzn3BHNiYXOQ3wvo5CMYmQ0i3k",
+            authDomain: "practice-investment-calculator.firebaseapp.com",
+            projectId: "practice-investment-calculator",
+            storageBucket: "practice-investment-calculator.firebasestorage.app",
+            messagingSenderId: "990783179778",
+            appId: "1:990783179778:web:f549d43eb65eab913c6b1b"
+        };
+      
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth();
+        const db = getFirestore();
+      
+        // Signup Function
+        function signUp() {
+          const email = document.getElementById("email").value;
+          const password = document.getElementById("password").value;
+          
+          createUserWithEmailAndPassword(auth, email, password)
+            .then((userCredential) => {
+              console.log("User created:", userCredential.user);
+              alert("User Registered!");
+            })
+            .catch((error) => {
+              console.error("Error:", error.message);
+            });
+        }
+      
+        // Login Function
+        function login() {
+          const email = document.getElementById("email").value;
+          const password = document.getElementById("password").value;
+          
+          signInWithEmailAndPassword(auth, email, password)
+            .then((userCredential) => {
+              console.log("User logged in:", userCredential.user);
+              alert("Login Successful!");
+            })
+            .catch((error) => {
+              console.error("Error:", error.message);
+            });
+        }
+      
+        // Logout Function
+        function logout() {
+            signOut(auth).then(() => {
+                console.log("User signed out");
+                updateAuthUI(null);
+            }).catch((error) => {
+                console.error("Error signing out:", error);
+            });
+        }
+        
+        // Update UI based on auth state
+        function updateAuthUI(user) {
+            if (user) {
+                authButton.textContent = "Logout";
+                authButton.removeEventListener("click", showModal);
+                authButton.addEventListener("click", logout);
+
+                            // Enable portfolio button
+                            document.getElementById("addPortfolio").disabled = false;
+            } else {
+                authButton.textContent = "Login / Sign Up";
+                authButton.removeEventListener("click", logout);
+                authButton.addEventListener("click", showModal);
+                
+                // Disable portfolio button if you want it only for logged in users
+                // document.getElementById("addPortfolio").disabled = true;
+            }
+        }
+        
+        function showModal() {
+            modal.style.display = "flex";
+        }
+        
+        // Check auth state on page load
+        onAuthStateChanged(auth, (user) => {
+            updateAuthUI(user);
+        });
+
+        document.getElementById("signup-btn").addEventListener("click", signUp);
+        document.getElementById("login-btn").addEventListener("click", login);
+
+                // Make Firebase available globally if needed
+                window.firebaseAuth = auth;
+        window.firebaseDb = db;
+
+      </script>
+   
+    <script>
+        // Auth modal controls
+        const modal = document.getElementById("auth-modal");
+        const authButton = document.getElementById("auth-button");
+        const closeModal = document.querySelector(".close-modal");
+        
+        function showModal() {
+            modal.style.display = "flex";
+        }
+        
+        authButton.addEventListener("click", showModal);
+        
+        closeModal.addEventListener("click", function() {
+            modal.style.display = "none";
+        });
+        
+        window.addEventListener("click", function(event) {
+            if (event.target === modal) {
+                modal.style.display = "none";
+            }
+        });
+    </script>
+
 </body>
 </html>
