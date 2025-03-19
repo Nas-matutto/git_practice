@@ -111,7 +111,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
       
         const firebaseConfig = {
@@ -132,14 +132,17 @@
         function signUp() {
           const email = document.getElementById("email").value;
           const password = document.getElementById("password").value;
-          
+  
           createUserWithEmailAndPassword(auth, email, password)
             .then((userCredential) => {
               console.log("User created:", userCredential.user);
               alert("User Registered!");
+              document.getElementById("auth-modal").style.display = "none";
+              window.location.href = "portfolio.html";
             })
-            .catch((error) => {
-              console.error("Error:", error.message);
+             .catch((error) => {
+               console.error("Error:", error.message);
+               alert("Error: " + error.message);
             });
         }
       
@@ -147,16 +150,19 @@
         function login() {
           const email = document.getElementById("email").value;
           const password = document.getElementById("password").value;
-          
-          signInWithEmailAndPassword(auth, email, password)
+  
+           signInWithEmailAndPassword(auth, email, password)
             .then((userCredential) => {
               console.log("User logged in:", userCredential.user);
               alert("Login Successful!");
+              document.getElementById("auth-modal").style.display = "none";
+              window.location.href = "portfolio.html";
             })
-            .catch((error) => {
-              console.error("Error:", error.message);
-            });
-        }
+             .catch((error) => {
+               console.error("Error:", error.message);
+             alert("Error: " + error.message);
+         });
+    }
       
         // Logout Function
         function logout() {
@@ -193,8 +199,8 @@
         
         // Check auth state on page load
         onAuthStateChanged(auth, (user) => {
-            updateAuthUI(user);
-        });
+          updateAuthUI(user);
+         });
 
         document.getElementById("signup-btn").addEventListener("click", signUp);
         document.getElementById("login-btn").addEventListener("click", login);
